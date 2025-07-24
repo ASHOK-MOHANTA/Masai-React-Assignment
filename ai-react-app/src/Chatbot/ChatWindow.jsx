@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Behavior, GoogleGenAI } from "@google/genai";
 import {
+  Loader2,
   Maximize,
   Maximize2,
   Minimize,
   Minimize2,
+  Send,
   Sparkle,
   X,
 } from "lucide-react";
@@ -66,7 +68,8 @@ const ChatWindow = ({ isOpen, onClick }) => {
 
   //   This will help us to scroll message
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ Behavior: "smooth" });
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
   }, [message]);
 
   useEffect(() => {
@@ -104,7 +107,7 @@ const ChatWindow = ({ isOpen, onClick }) => {
     }
   };
 
-  const hadelKeyDown = (e) => {
+  const handelKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
@@ -146,15 +149,16 @@ const ChatWindow = ({ isOpen, onClick }) => {
             onClick={onClick}
             className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
           >
-            <X />
+            <X size={16} />
           </button>
         </div>
       </div>
 
       {!isMinimized && (
         <>
-          <div className="h-[clac(100%-8rem)] overflow-y-auto p-3 space-y-3 bg-gray-900 ">
-            {message.map((message, index) => {
+          {/* Message Section */}
+          <div className="h-[320px] overflow-y-auto p-3 space-y-3 bg-gray-900">
+            {message.map((message, index) => (
               <div key={index} className="flex items-start gap-2 text-white">
                 {message.isBot ? (
                   <ChatMessage message={message.text} isBot={true} />
@@ -168,9 +172,35 @@ const ChatWindow = ({ isOpen, onClick }) => {
                     </div>
                   </div>
                 )}
-              </div>;
-            })}
+              </div>
+            ))}
+            {loading && (<div className="flex items-center gap-2 text-white p-2">
+              <Loader2 className="w-4 h-4 animate-spin"/>
+              <span className="text-xs">AI is thinking...</span>
+            </div>)}
+            <div ref={messageEndRef}></div>
           </div>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handelKeyDown}
+                rows={1}
+                style={{ maxHeight: "100px" }}
+                placeholder="Type your query.."
+                className={`w-full pr-10 pl-3 py-2 rounded-2xl border border-gray-200 text-white`}
+              ></textarea>
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className={`absolute right-0.5 bottom-0.3 text-white -translate-x-1/2 p-2 rounded-full`}
+              >
+                <Send size={25} />
+              </button>
+            </div>
+          </form>
         </>
       )}
     </div>
